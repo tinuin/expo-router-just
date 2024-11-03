@@ -3,12 +3,15 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack, useNavigationContainerRef } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
+
+import { initDb } from '../services/database'
 
 import { useReactNavigationDevTools } from '@dev-plugins/react-navigation';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { ActivityIndicator } from 'react-native';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -48,9 +51,23 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const [dbInits, setdbInits] = useState(false);
   const colorScheme = useColorScheme();
   const navRef = useNavigationContainerRef();
   useReactNavigationDevTools(navRef);
+
+  useEffect(()=>{
+    const initializeDatabase = async () => {
+      await initDb();
+      setdbInits(true);
+    }
+    initializeDatabase();
+  }, [])
+
+  if(!dbInits) {
+    return <ActivityIndicator />
+  }
+
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
